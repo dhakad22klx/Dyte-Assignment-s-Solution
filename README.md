@@ -4,7 +4,7 @@ Implemented BenchmarkSample function in the most efficient way possible.
 
 ## Solution Approach (Description)
 
-After understanding the code and problem, I identified operations to improve performance and efficiency. By leveraging my competitive programming skills, I realized that eliminating unnecessary function calls was a key strategy. This optimization process was straightforward once I grasped the problem and code structure.I have takend reference of BenchmarkRawUDP function and have made following changes :
+After understanding the code and problem, I identified operations to improve performance and efficiency. By leveraging my competitive programming skills, I realized that eliminating unnecessary function calls was a key strategy. This optimization process was straightforward once I grasped the problem and code structure.I have taken reference of BenchmarkRawUDP function and have made following changes :
 
 - Instead of calling 'getTestMsg()' function for each reader for each writer function call, I am calling it one time that is for each writer function call.
 
