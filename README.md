@@ -1,6 +1,6 @@
 # Dyte Hiring Challenge Submission
 
-Implemented BenchmarkSample function in the most efficient way possible.
+Implemented BenchmarkSample function in the most efficient way possible to my current knowledge.
 
 ## Solution Approach (Description)
 
