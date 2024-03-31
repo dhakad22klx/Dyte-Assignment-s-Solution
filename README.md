@@ -4,21 +4,23 @@ Implemented BenchmarkSample function in the most efficient way possible.
 
 ## Solution Approach (Description)
 
-After understanding the code and problem, I identified operations to improve performance and efficiency. By leveraging my programming skills, I realized that eliminating unnecessary function calls was a key strategy. This optimization process was straightforward once I grasped the problem and code structure.I have taken reference of BenchmarkRawUDP function and have made following changes :
+After understanding the code and problem, I identified operations to improve performance and efficiency to some extent. By leveraging my programming skills, I realized that some precomputation may be useful.I have taken reference of BenchmarkRawUDP function and have made following changes :
 
-- Instead of calling 'getTestMsg()' function for each reader for each writer function call, I am calling it one time that is for each writer function call.
+- Precomputing connections instead of building connection for each writer function call (i.e. b.N times).
 
-- Instead of calling 'waitForReaders(readChan, b)' function for each writer function call, I am calling it after all writer function calls.
+- Instead of sending UDP packets sequencially now we are sending concurrently utilizing goroutines.
 
 ## Result i got as compared to BenchmarkRawUDP function (Baseline Implementation) are following in order : 
 
-- Number of iterations per second -    >=3 times better.
-- Time for processing each iteration - >=4 times better.
-- Bytes allocated per iteration        >20 times better.
-- Number of allocations per iteration- >=3 times better.
+- Number of iterations per second -    Almost 2 times better.
+- Time for processing each iteration - Almost  1.5 times better.
+- Bytes allocated per iteration       - Bit better.
+- Number of allocations per iteration - Bit better.
 
-![Screenshot from 2024-03-27 23-04-31](https://github.com/dhakad22klx/Dyte-Hiring-Challenge-Solution/assets/87806512/77835a8d-5740-4477-8db5-5a89a108706b)
+![Screenshot from 2024-03-30 23-43-14](https://github.com/dhakad22klx/Dyte-Hiring-Challenge-Solution/assets/87806512/e6901148-fbf1-4003-92af-b8f143e29d94)
 
 ## Trade-off
 
-Insted of sending different message 'buf' to all readers in each writer function call, now we are sending same message 'buf' to all readers in each writer function call to have less memory footprints.
+- We are not caring about the order in which each reader receiving messages.
+- Increased resource usage, as each thread requires its own set of resources such as memory and CPU time.
+-  Precomputing the connection pool improves performance by reducing latency since connections are established beforehand. However, Preallocation of resources may not be suitable for scenarios where the number of connections ( readersCount ) varies dynamically.
