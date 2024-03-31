@@ -19,7 +19,7 @@ After understanding the code and problem, I identified operations to improve per
 
 ![Screenshot from 2024-03-30 23-43-14](https://github.com/dhakad22klx/Dyte-Hiring-Challenge-Solution/assets/87806512/e6901148-fbf1-4003-92af-b8f143e29d94)
 
-## Trade-off
+## Trade-offs
 
 - We are not caring about the order in which each reader receiving messages.
 - Increased resource usage, as each thread requires its own set of resources such as memory and CPU time.
