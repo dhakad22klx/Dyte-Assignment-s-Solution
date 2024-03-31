@@ -13,7 +13,7 @@ After understanding the code and problem, I identified operations to improve per
 ## Result i got as compared to BenchmarkRawUDP function (Baseline Implementation) are following in order : 
 
 - Number of iterations per second -    Almost 2 times better.
-- Time for processing each iteration - Almost  1.5 times better.
+- Time for processing each iteration - Almost  1.85 times better.
 - Bytes allocated per iteration       - Bit better.
 - Number of allocations per iteration - Bit better.
 
