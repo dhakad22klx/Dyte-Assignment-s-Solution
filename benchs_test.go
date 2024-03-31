@@ -179,59 +179,78 @@ func BenchmarkRawUDP(b *testing.B) {
 	close(closeChan)
 }
 
-// Implement your benchmarks here -->
+// Implement your benchmarks // Implement your benchmarks here -->
 // Please read the comments carefully. You need to implement something atleast much faster than the baseline
 func BenchmarkSample(b *testing.B) {
-	// Stop the timer to perform setup operations.
-	b.StopTimer()
+	// Stop the timer to perform setup operations
+    b.StopTimer()
 
 	testPort := 40101
 	// Create a UDP connection to send messages.
-	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: testPort})
+	conn, err := net.ListenUDP("udp", &net.UDPAddr{
+		IP:   net.IPv4(127, 0, 0, 1),
+		Port: testPort,
+	})
 	if err != nil {
 		b.Fatal(err)
 	}
-
 	defer conn.Close()
 
-	// Preallocate UDP addresses for each port.
+    // Preallocate UDP addresses for each port.
 	// These addresses will be used to specify the destination for each message.
-	ports, readChan, closeChan, err := testInit(readersCount, false)
-	if err != nil {
-		b.Fatal(err)
-	}
+    ports, readChan, closeChan, err := testInit(readersCount, false)
+    if err != nil {
+        b.Fatal(err)
+    }
+    defer close(closeChan)
 
-	defer close(closeChan)
+    // Create a connection pool : Precomputation
+    connPool := make([]*net.UDPConn, readersCount)
+    for i, port := range ports {
+        conn, err := net.DialUDP("udp", nil, &net.UDPAddr{
+            IP:   net.IPv4(127, 0, 0, 1),
+            Port: port,
+        })
+        if err != nil {
+            b.Fatal(err)
+        }
+        defer conn.Close()
+        connPool[i] = conn
+    }
 
 	// writer is a function responsible for sending messages to all readers.
-	writer := func() {
+    writer := func() {
+        var wg sync.WaitGroup
+        wg.Add(readersCount)
 
-		buf := getTestMsg()
-		
-		// Use a single syscall to write to all readers.
-		for i := 0; i < readersCount; i++ {
-			// Send the message to the corresponding reader.
-			_, err := conn.WriteTo(buf, &net.UDPAddr{
-				IP:   net.IPv4(127, 0, 0, 1),
-				Port: ports[i],
-			})
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-	}
+        // Concurrently write to connections
+        for _, conn := range connPool {
+			conn := conn                   // to make unique otherwise will be shared with each goroutines 
+            go func(){
+                defer wg.Done()
+                buf := getTestMsg()
+                _, err := conn.Write(buf)  // Send the message to the corresponding reader.
+                if err != nil {
+                    b.Fatal(err)
+                }
+            }()
+        }
+
+        // Wait for all write operations to complete
+        wg.Wait()
+
+        // Wait for readers
+        waitForReaders(readChan, b) 
+    }
 
 	// Start the timer to measure the benchmark.
-	b.StartTimer()
+    b.StartTimer()
 
 	// Execute the benchmark for the specified number of iterations.
-	for i := 0; i < b.N; i++ {
-		writer() // Send messages to all readers.
-	}
-	
-	// Wait for all readers to finish reading the messages.
-	waitForReaders(readChan, b)
-	
+    for i := 0; i < b.N; i++ {
+        writer()
+    }
+
 	// Stop the timer after completing the benchmark iterations.
-	b.StopTimer()
+    b.StopTimer()
 }
